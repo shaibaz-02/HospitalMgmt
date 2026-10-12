@@ -1,0 +1,22 @@
+@model HospitalMgmt.Core.Entities.Doctor
+
+@{
+    ViewData["Title"] = "Delete Doctor";
+}
+
+<h3>Are you sure you want to delete this doctor?</h3>
+
+<dl class="row">
+    <dt class="col-sm-3">Name</dt>
+    <dd class="col-sm-9">@Model.FirstName @Model.LastName</dd>
+    <dt class="col-sm-3">Specialization</dt>
+    <dd class="col-sm-9">@Model.Specialization</dd>
+    <dt class="col-sm-3">Department</dt>
+    <dd class="col-sm-9">@Model.Department.Name</dd>
+</dl>
+
+<form asp-action="Delete" method="post">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger">Delete</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
