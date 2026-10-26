@@ -1,8 +1,8 @@
-@model HospitalMgmt.Core.Entities.Department
+@model HospitalMgmt.Web.ViewModels.DepartmentFormViewModel
 
 <form asp-action="Edit" method="post">
     <input type="hidden" asp-for="Id" />
-<input type="hidden" asp-for="CreatedOn" />
+    @* <input type="hidden" asp-for="CreatedOn" /> *@
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
     <div class="form-group">
@@ -23,5 +23,9 @@
         <span asp-validation-for="Location" class="text-danger"></span>
     </div>
 
+    <div class="form-check mb-3">
+        <input asp-for="IsActive" class="form-check-input" />
+        <label asp-for="IsActive" class="form-check-label"></label>
+    </div>
     <button type="submit" class="btn btn-primary">Save</button>
 </form>

@@ -6,7 +6,8 @@ using HospitalMgmt.Infrastructure;
 using HospitalMgmt.Infrastructure.Data;
 using HospitalMgmt.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
-
+using HospitalMgmt.Application.Mappings;
+using HospitalMgmt.Web.Mappings;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,8 +24,20 @@ builder.Services.AddScoped<IDepartmentRepository, DepartmentRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IDepartmentService, DepartmentService>();
 
+builder.Services.AddAutoMapper(
+    typeof(DepartmentProfile).Assembly,
+    typeof(DepartmentViewModelProfile).Assembly);
 
 var app = builder.Build();
+
+
+
+if (app.Environment.IsDevelopment())
+{
+    app.Services
+        .GetRequiredService<AutoMapper.IConfigurationProvider>()
+        .AssertConfigurationIsValid();
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -33,6 +46,7 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 } 
+
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();

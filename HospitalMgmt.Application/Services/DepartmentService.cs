@@ -1,4 +1,6 @@
+using AutoMapper;
 using HospitalMgmt.Application.Common;
+using HospitalMgmt.Application.DTOs;
 using HospitalMgmt.Application.Interfaces;
 using HospitalMgmt.Core.Entities;
 using HospitalMgmt.Core.Interfaces;
@@ -10,63 +12,62 @@ namespace HospitalMgmt.Application.Services
     public class DepartmentService : IDepartmentService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
         private readonly ILogger<DepartmentService> _logger;
 
-        public DepartmentService(IUnitOfWork unitOfWork, ILogger<DepartmentService> logger)
+        public DepartmentService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<DepartmentService> logger)
         {
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
             _logger = logger;
         }
 
-        public async Task<IEnumerable<Department>> GetAllAsync()
+        public async Task<IEnumerable<DepartmentDto>> GetAllAsync()
         {
-            return await _unitOfWork.Departments.GetAllAsync();
+            var departments = await _unitOfWork.Departments.GetAllAsync();
+            return _mapper.Map<IEnumerable<DepartmentDto>>(departments);
         }
 
-        public async Task<Department?> GetByIdAsync(int id)
+        public async Task<DepartmentDto?> GetByIdAsync(int id)
         {
-            return await _unitOfWork.Departments.GetByIdAsync(id);
+            var department = await _unitOfWork.Departments.GetByIdAsync(id);
+            return department == null ? null : _mapper.Map<DepartmentDto>(department);
         }
 
-        // public async Task<OperationResult> CreateAsync(Department department)
-        // {
-        //     // Task 5: unique-name check goes here
-        //     await _unitOfWork.Departments.AddAsync(department);
-        //     await _unitOfWork.SaveChangesAsync();
-        //     return OperationResult.Ok();
-        // }
-
-        // public async Task<OperationResult> UpdateAsync(Department department)
-        // {
-        //     // Task 5: unique-name check goes here (exclude the department itself)
-        //     _unitOfWork.Departments.Update(department);
-        //     await _unitOfWork.SaveChangesAsync();
-        //     return OperationResult.Ok();
-        // }
-        public async Task<OperationResult> CreateAsync(Department department)
+        public async Task<OperationResult> CreateAsync(CreateDepartmentDto dto)
         {
-            department.Name = department.Name.Trim();
+            var name = dto.Name.Trim();
 
-            if (await _unitOfWork.Departments.NameExistsAsync(department.Name))
-                return OperationResult.Fail($"A department named '{department.Name}' already exists.");
+            if (await _unitOfWork.Departments.NameExistsAsync(name))
+                return OperationResult.Fail($"A department named '{name}' already exists.");
+
+            var department = _mapper.Map<Department>(dto);
+            department.Name = name;
 
             await _unitOfWork.Departments.AddAsync(department);
             await _unitOfWork.SaveChangesAsync();
             return OperationResult.Ok();
         }
 
-        public async Task<OperationResult> UpdateAsync(Department department)
+        public async Task<OperationResult> UpdateAsync(UpdateDepartmentDto dto)
         {
-            department.Name = department.Name.Trim();
+            var department = await _unitOfWork.Departments.GetByIdAsync(dto.Id);
+            if (department == null)
+                return OperationResult.Fail("Department not found.");
 
-            if (await _unitOfWork.Departments.NameExistsAsync(department.Name, department.Id))
-                return OperationResult.Fail($"A department named '{department.Name}' already exists.");
+            var name = dto.Name.Trim();
 
-            _unitOfWork.Departments.Update(department);
+            if (await _unitOfWork.Departments.NameExistsAsync(name, dto.Id))
+                return OperationResult.Fail($"A department named '{name}' already exists.");
+
+            _mapper.Map(dto, department);   // copies DTO values ONTO the loaded entity
+            department.Name = name;
+
             await _unitOfWork.SaveChangesAsync();
             return OperationResult.Ok();
         }
 
+        // DeleteAsync stays exactly as it is
         public async Task<OperationResult> DeleteAsync(int id)
         {
             var department = await _unitOfWork.Departments.GetByIdAsync(id);
@@ -92,3 +93,4 @@ namespace HospitalMgmt.Application.Services
         }
     }
 }
+

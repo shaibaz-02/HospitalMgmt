@@ -23,12 +23,12 @@ namespace HospitalMgmt.Infrastructure.Repositories
             return await _context.Doctors.AnyAsync(d => d.DepartmentId == departmentId);
         }
         public async Task<bool> NameExistsAsync(string name, int? excludeId = null)
-{
-    var normalized = name.Trim().ToLower();
+        {
+            var normalized = name.Trim().ToLower();
 
-    return await _context.Departments.AnyAsync(d =>
-        d.Name.ToLower() == normalized &&
-        (excludeId == null || d.Id != excludeId));
-}
+            return await _context.Departments.AnyAsync(d =>
+                d.Name.ToLower() == normalized &&
+                (excludeId == null || d.Id != excludeId));
+        }
     }
 }
